@@ -15,5 +15,7 @@ runs:
   steps:
     - name: debug
       run: echo ${{ inputs.nginx_tag }}
+      shell: bash
     - name: debug
       run: echo ${{ inputs.platform }}
+      shell: bash
