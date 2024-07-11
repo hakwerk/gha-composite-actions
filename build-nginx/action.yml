@@ -1,0 +1,88 @@
+name: "Build nginx docker images"
+description: "Build nginx docker images for a list of platforms"
+
+inputs:
+  nginx_tag:
+    description: "Tag / version number of nginx"
+    required: true
+  nginx-digest-linux-amd64:
+    description: "Digest of the official nginx image for linux/amd64"
+    required: true
+  nginx-digest-linux-arm64:
+    description: "Digest of the official nginx image for linux/arm64"
+    required: true
+
+runs:
+  using: "composite"
+  strategy:
+    matrix:
+      platform:
+        - linux/amd64
+        - linux/arm64
+  steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v4
+      with:
+        ref: "${{ github.head_ref }}"
+        fetch-depth: 1
+
+    - name: Nginx digest var (amd64)
+      if: matrix.platform == 'linux/amd64'
+      run: |
+        echo "ngdigest=${{ inputs.nginx-digest-linux-amd64 }}" >> $GITHUB_ENV
+
+    - name: Nginx digest var (arm64)
+      if: matrix.platform == 'linux/arm64'
+      run: |
+        echo "ngdigest=${{ inputs.nginx-digest-linux-arm64 }}" >> $GITHUB_ENV
+
+    - name: Set the correct base image in Dockerfile
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        include: "**Dockerfile"
+        find: "nginx:mainline"
+        replace: "nginx@${{ env.ngdigest }}"
+        regex: false
+
+    - name: Set up docker buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: "${{ github.repository_owner }}"
+        password: "${{ secrets.DOCKER_PASSWORD }}"
+
+    - name: Set vars
+      id: vars
+      run: |
+        echo "artifact-name=digest-$(echo '${{ matrix.platform }}' | tr / -)" >> "${GITHUB_OUTPUT}"
+        echo 'cache-to=type=gha,scope=${{ github.ref_name }}-${{ matrix.platform }}' >> "${GITHUB_OUTPUT}"
+        echo 'cache-from=type=gha,scope=${{ github.ref_name }}-${{ matrix.platform }}' >> "${GITHUB_OUTPUT}"
+
+    - name: Build and push by digest
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        platforms: "${{ matrix.platform }}"
+        outputs: |
+          type=image,name=${{ github.repository }},push-by-digest=true,name-canonical=true,push=true
+        cache-from: |
+          ${{ steps.vars.outputs.cache-from }}
+        cache-to: |
+          ${{ steps.vars.outputs.cache-to }}
+
+    - name: Export digest
+      run: |
+        mkdir -p /tmp/digests
+        digest='${{ steps.build.outputs.digest }}'
+        touch "/tmp/digests/${digest#sha256:}"
+
+    - name: Upload digest
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.vars.outputs.artifact-name }}
+        path: /tmp/digests/*
+        if-no-files-found: error
+        retention-days: 1
