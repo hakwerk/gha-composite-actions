@@ -5,12 +5,6 @@ inputs:
   nginx_tag:
     description: "Tag / version number of nginx"
     required: true
-  nginx-digest-linux-amd64:
-    description: "Digest of the official nginx image for linux/amd64"
-    required: true
-  nginx-digest-linux-arm64:
-    description: "Digest of the official nginx image for linux/arm64"
-    required: true
 
 runs:
   using: "composite"
