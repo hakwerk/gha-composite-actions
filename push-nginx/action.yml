@@ -5,6 +5,8 @@ inputs:
   nginx_tag:
     description: "Tag / version number of nginx"
     required: true
+  dockerpwd:
+    required: true
 
 runs:
   using: "composite"
@@ -26,7 +28,7 @@ runs:
       uses: docker/login-action@v3
       with:
         username: "${{ github.repository_owner }}"
-        password: "${{ secrets.DOCKER_PASSWORD }}"
+        password: "${{ inputs.dockerpwd }}"
 
     - name: Create manifest list and push
       working-directory: /tmp/digests

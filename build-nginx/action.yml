@@ -11,14 +11,11 @@ inputs:
   nginx-digest-linux-arm64:
     description: "Digest of the official nginx image for linux/arm64"
     required: true
+  dockerpwd:
+    required: true
 
 runs:
   using: "composite"
-  strategy:
-    matrix:
-      platform:
-        - linux/amd64
-        - linux/arm64
   steps:
     - name: Checkout this repo
       uses: actions/checkout@v4
@@ -30,11 +27,13 @@ runs:
       if: matrix.platform == 'linux/amd64'
       run: |
         echo "ngdigest=${{ inputs.nginx-digest-linux-amd64 }}" >> $GITHUB_ENV
+      shell: bash
 
     - name: Nginx digest var (arm64)
       if: matrix.platform == 'linux/arm64'
       run: |
         echo "ngdigest=${{ inputs.nginx-digest-linux-arm64 }}" >> $GITHUB_ENV
+      shell: bash
 
     - name: Set the correct base image in Dockerfile
       uses: jacobtomlinson/gha-find-replace@v3
@@ -51,7 +50,7 @@ runs:
       uses: docker/login-action@v3
       with:
         username: "${{ github.repository_owner }}"
-        password: "${{ secrets.DOCKER_PASSWORD }}"
+        password: "${{ inputs.dockerpwd }}"
 
     - name: Set vars
       id: vars
@@ -59,6 +58,7 @@ runs:
         echo "artifact-name=digest-$(echo '${{ matrix.platform }}' | tr / -)" >> "${GITHUB_OUTPUT}"
         echo 'cache-to=type=gha,scope=${{ github.ref_name }}-${{ matrix.platform }}' >> "${GITHUB_OUTPUT}"
         echo 'cache-from=type=gha,scope=${{ github.ref_name }}-${{ matrix.platform }}' >> "${GITHUB_OUTPUT}"
+      shell: bash
 
     - name: Build and push by digest
       id: build
@@ -78,6 +78,7 @@ runs:
         mkdir -p /tmp/digests
         digest='${{ steps.build.outputs.digest }}'
         touch "/tmp/digests/${digest#sha256:}"
+      shell: bash
 
     - name: Upload digest
       uses: actions/upload-artifact@v4
