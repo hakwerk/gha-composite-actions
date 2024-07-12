@@ -20,6 +20,7 @@ runs:
     - name: DEBUG1
       run: |
         ls -latr /tmp/digests
+      shell: bash
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -35,10 +36,12 @@ runs:
       run: |
         docker buildx imagetools create -t ${{ github.repository }}:${{ inputs.nginx_tag }} -t ${{ github.repository }}:latest \
           $(printf '${{ github.repository }}@sha256:%s ' *)
+      shell: bash
 
     - name: Inspect image
       run: |
         docker buildx imagetools inspect '${{ github.repository }}:${{ inputs.nginx_tag }}'
+      shell: bash
 
     - name: Notify by email
       uses: dawidd6/action-send-mail@v3
