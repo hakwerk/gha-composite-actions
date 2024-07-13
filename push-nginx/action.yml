@@ -6,6 +6,13 @@ inputs:
     description: "Tag / version number of nginx"
     required: true
   dockerpwd:
+    description: "Password for docker hub"
+    required: true
+  mail_url:
+    description: "Connection string for the smtp host"
+    required: true
+  mail_to:
+    description: "Address to send email to"
     required: true
 
 runs:
@@ -46,9 +53,8 @@ runs:
     - name: Notify by email
       uses: dawidd6/action-send-mail@v3
       with:
-        connection_url: ${{secrets.MAIL_CONNECTION}}
+        connection_url: ${{ inputs.mail_url }}
         subject: "Built new docker image: ${{ github.repository }}:${{ inputs.nginx_tag }}"
-        to: ${{secrets.MAIL_TO}}
+        to: ${{ inputs.mail_to }}
         from: GitHub action
         body: Build job of ${{github.repository}} completed successfully! Pushed new image with version tag ${{ inputs.nginx_tag }}.
-                                                                                                                                                      

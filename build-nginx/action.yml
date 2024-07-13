@@ -12,6 +12,7 @@ inputs:
     description: "Digest of the official nginx image for linux/arm64"
     required: true
   dockerpwd:
+    description: "Password for docker hub"
     required: true
 
 runs:
