@@ -35,26 +35,11 @@ runs:
         ls -l /tmp/digests
       shell: bash
 
-    - name: Debug5
-      if: ${{ hashFiles('/tmp/digests/') != '' }}
-      run: |
-        echo "**** we indeed have files!"
-      shell: bash
-
-    - name: Debug2
-      run: |
-        ls -l /tmp/digests/${{ env.DIGEST_PATTERN }}
-      shell: bash
-
-    - name: Debug3
-      run: |
-        ls -l /tmp/digests/${{ env.DIGEST_PATTERN }} | wc -l
-      shell: bash
-
     - name: Check if there are any files
       run: |
-        echo "HAVE_FILES=$(find /tmp/digests -name \"$DIGEST_PATTERN\" | wc -l)" >> $GITHUB_ENV
+        echo "HAVE_FILES=$(ls -1 /tmp/digests | wc -l)" >> $GITHUB_ENV
       shell: bash
+      continue-on-error: true
 
     - name: Debug
       run: |
