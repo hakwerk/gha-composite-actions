@@ -46,7 +46,7 @@ runs:
       shell: bash
 
     - name: Debug2
-      if: ${{ env.HAVE_FILES != '0' }}
+      if: ${{ hashFiles(env.DIGEST_PATTERN) != '' }}
       run: |
         echo "**** we indeed have files!"
       shell: bash
