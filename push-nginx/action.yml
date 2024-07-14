@@ -23,11 +23,6 @@ runs:
         echo "DIGEST_PATTERN=$(echo 'digest-${{ inputs.nginx_tag }}-*' | tr / -)" >> $GITHUB_ENV
       shell: bash
 
-    - name: Debug
-      run: |
-        echo "**** digest pattern = ${{ env.DIGEST_PATTERN }}..."
-      shell: bash
-
     - name: Download digests
       uses: actions/download-artifact@v4
       with:
@@ -37,7 +32,7 @@ runs:
 
     - name: Check if there are any files
       run: |
-        echo "HAVE_FILES=$(find /tmp/digests -name '${{ env.DIGEST_PATTERN }}' | wc -l)" >> $GITHUB_ENV
+        echo "HAVE_FILES=$(find /tmp/digests -name \"$DIGEST_PATTERN\" | wc -l)" >> $GITHUB_ENV
       shell: bash
 
     - name: Debug
@@ -46,7 +41,7 @@ runs:
       shell: bash
 
     - name: Debug2
-      if: ${{ hashFiles(env.DIGEST_PATTERN) != '' }}
+      if: ${{ env.HAVE_FILES != '0' }}
       run: |
         echo "**** we indeed have files!"
       shell: bash
