@@ -35,6 +35,12 @@ runs:
         ls -l /tmp/digests
       shell: bash
 
+    - name: Debug5
+      if: ${{ hashFiles('/tmp/digests/') != '' }}
+      run: |
+        echo "**** we indeed have files!"
+      shell: bash
+
     - name: Debug2
       run: |
         ls -l /tmp/digests/${{ env.DIGEST_PATTERN }}
