@@ -30,27 +30,11 @@ runs:
         merge-multiple: true
         path: /tmp/digests-${{ inputs.nginx_tag }}
 
-    - name: Debug
-      run: |
-        ls -l /tmp/digests-${{ inputs.nginx_tag }}
-      shell: bash
-
     - name: Check if there are any files
       run: |
         echo "HAVE_FILES=$(ls -1 /tmp/digests-${{ inputs.nginx_tag }} | wc -l)" >> $GITHUB_ENV
       shell: bash
       continue-on-error: true
-
-    - name: Debug
-      run: |
-        echo "**** have files = ${{ env.HAVE_FILES }}..."
-      shell: bash
-
-    - name: Debug2
-      if: ${{ env.HAVE_FILES != '0' }}
-      run: |
-        echo "**** we indeed have files!"
-      shell: bash
 
     - name: Set up Docker Buildx
       if: ${{ env.HAVE_FILES != '0' }}
