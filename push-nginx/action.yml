@@ -30,6 +30,21 @@ runs:
         merge-multiple: true
         path: /tmp/digests
 
+    - name: Debug
+      run: |
+        ls -l /tmp/digests
+      shell: bash
+
+    - name: Debug2
+      run: |
+        ls -l /tmp/digests/${{ env.DIGEST_PATTERN }}
+      shell: bash
+
+    - name: Debug3
+      run: |
+        ls -l /tmp/digests/${{ env.DIGEST_PATTERN }} | wc -l
+      shell: bash
+
     - name: Check if there are any files
       run: |
         echo "HAVE_FILES=$(find /tmp/digests -name \"$DIGEST_PATTERN\" | wc -l)" >> $GITHUB_ENV
