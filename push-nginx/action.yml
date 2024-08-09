@@ -5,6 +5,9 @@ inputs:
   nginx_tag:
     description: "Tag / version number of nginx"
     required: true
+  nginx_latest:
+    description: "Latest version number of nginx"
+    required: true
   dockerpwd:
     description: "Password for docker hub"
     required: true
@@ -47,11 +50,19 @@ runs:
         username: "${{ github.repository_owner }}"
         password: "${{ inputs.dockerpwd }}"
 
-    - name: Create manifest list and push
-      if: ${{ env.HAVE_FILES != '0' }}
+    - name: Create manifest list and push with latest
+      if: ${{ env.HAVE_FILES != '0' && inputs.nginx_tag == inputs.nginx_latest }}
       working-directory: /tmp/digests-${{ inputs.nginx_tag }}
       run: |
         docker buildx imagetools create -t ${{ github.repository }}:${{ inputs.nginx_tag }} -t ${{ github.repository }}:latest \
+          $(printf '${{ github.repository }}@sha256:%s ' *)
+      shell: bash
+
+    - name: Create manifest list and push
+      if: ${{ env.HAVE_FILES != '0' && inputs.nginx_tag != inputs.nginx_latest }}
+      working-directory: /tmp/digests-${{ inputs.nginx_tag }}
+      run: |
+        docker buildx imagetools create -t ${{ github.repository }}:${{ inputs.nginx_tag }} \
           $(printf '${{ github.repository }}@sha256:%s ' *)
       shell: bash
 
