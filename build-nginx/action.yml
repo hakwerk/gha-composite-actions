@@ -31,7 +31,7 @@ runs:
       shell: bash
 
     - name: Nginx digest var (arm64)
-      if: matrix.platform == 'linux/arm64'
+      if: matrix.platform == 'linux/arm64' || matrix.platform == 'linux/arm64/v8'
       run: |
         echo "ngdigest=${{ inputs.nginx-digest-linux-arm64 }}" >> $GITHUB_ENV
       shell: bash
