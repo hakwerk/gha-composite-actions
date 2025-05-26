@@ -81,3 +81,4 @@ runs:
         to: ${{ inputs.mail_to }}
         from: GitHub action
         body: Build job of ${{github.repository}} completed successfully! Pushed new image with version tag ${{ inputs.nginx_tag }}.
+      continue-on-error: true
